@@ -1,0 +1,58 @@
+{
+  "name": "proof-of-remittance",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prove an INR bank credit cleared a threshold from the bank's own HTTPS response (TLSNotary + Noir), without revealing the amount, then release a USDC escrow on-chain.",
+  "keywords": [
+    "zktls",
+    "tlsnotary",
+    "noir",
+    "zero-knowledge",
+    "escrow",
+    "remittance",
+    "attestation",
+    "evm"
+  ],
+  "license": "MIT",
+  "author": "Agnij Dutta (https://github.com/agnij-dutta)",
+  "homepage": "https://github.com/agnij-dutta/proof-of-remittance#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agnij-dutta/proof-of-remittance.git"
+  },
+  "bugs": {
+    "url": "https://github.com/agnij-dutta/proof-of-remittance/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "certs": "scripts/gen-certs.sh",
+    "build": "npm run certs && npm run build:rust && npm run build:circuit && npm run build:contracts",
+    "build:rust": "cargo build --release --locked --manifest-path prover-rs/Cargo.toml",
+    "build:circuit": "cd circuit && nargo compile && bb write_vk -b target/remittance.json -o target -t evm",
+    "build:contracts": "cd contracts && forge build",
+    "test": "npm run test:js && npm run test:rust && npm run test:circuit && npm run test:contracts",
+    "test:js": "node --test \"test/*.test.mjs\"",
+    "test:rust": "cargo test --release --locked --manifest-path prover-rs/Cargo.toml",
+    "test:circuit": "cd circuit && nargo test",
+    "test:contracts": "cd contracts && forge test -vv",
+    "lint": "biome check . && tsc -p . && cargo fmt --manifest-path prover-rs/Cargo.toml --check && cargo clippy --release --locked --all-targets --manifest-path prover-rs/Cargo.toml -- -D warnings && cd contracts && forge fmt --check && cd ../circuit && nargo fmt --check",
+    "typecheck": "tsc -p .",
+    "format": "biome check --write . && cargo fmt --manifest-path prover-rs/Cargo.toml && cd contracts && forge fmt && cd ../circuit && nargo fmt",
+    "bank": "node bank/server.mjs",
+    "verifier": "node verifier/server.mjs",
+    "demo": "node scripts/demo.mjs",
+    "fixture": "cp .run/fixture.json contracts/test/fixtures/bundle.json",
+    "check:verifier": "bb write_solidity_verifier -k circuit/target/vk -o .run/HonkVerifier.check.sol -t evm && cmp .run/HonkVerifier.check.sol contracts/src/HonkVerifier.sol"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}

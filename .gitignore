@@ -1,0 +1,19 @@
+node_modules/
+prover-rs/target/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+circuit/target/*
+!circuit/target/vk
+circuit/Prover.toml
+.run/
+# Test certificates are generated locally by scripts/gen-certs.sh
+certs/*
+!certs/openssl.cnf
+# Local secrets
+.env
+.env.*
+!.env.example
+*.pem
+# OS / editor
+.DS_Store

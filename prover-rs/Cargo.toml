@@ -1,0 +1,50 @@
+[package]
+name = "por-tlsn"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "TLSNotary prover and notary for Proof of Remittance: notarize one bank credit, hide the amount, sign an EVM attestation."
+authors = ["Agnij Dutta"]
+license = "MIT"
+repository = "https://github.com/agnij-dutta/proof-of-remittance"
+homepage = "https://github.com/agnij-dutta/proof-of-remittance"
+keywords = ["zktls", "tlsnotary", "zero-knowledge", "attestation", "remittance"]
+categories = ["cryptography", "command-line-utilities"]
+publish = false
+
+[workspace]
+
+[dependencies]
+tlsn = { git = "https://github.com/tlsnotary/tlsn", tag = "v0.1.0-alpha.15" }
+spansy = { git = "https://github.com/tlsnotary/tlsn-utils", rev = "64722f7" }
+
+anyhow = "1.0"
+futures = "0.3"
+hex = "0.4"
+http-body-util = "0.1"
+hyper = { version = "1.1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["full"] }
+k256 = { version = "0.13", features = ["ecdsa"] }
+sha3 = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.38", features = ["rt", "rt-multi-thread", "macros", "net", "io-std", "fs", "time"] }
+tokio-util = "0.7"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[lib]
+name = "por_tlsn"
+path = "src/lib.rs"
+
+[[bin]]
+name = "notary"
+path = "src/notary.rs"
+
+[[bin]]
+name = "prove"
+path = "src/prove.rs"
+
+[profile.release]
+debug = false
+incremental = false

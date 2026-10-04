@@ -1,0 +1,18 @@
+# Extensions for the TEST-ONLY certificates made by scripts/gen-certs.sh.
+
+# Root CAs (MockBank root, Impostor root).
+[ v3_ca ]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+
+# Leaf certificate for the mock bank hostname.
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+authorityKeyIdentifier = keyid
+
+[ alt_names ]
+DNS.1 = netbanking.mockbank.test

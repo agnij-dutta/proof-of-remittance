@@ -10,7 +10,9 @@ Selection criteria, in priority order:
 4. **A path to on-chain verification** (EVM first; Solana is a nice-to-have).
 5. **An honest trust model** I can explain in one paragraph.
 
-Facts below were gathered on 2026-10-04 from project docs, release pages and GitHub. Anything I could not confirm is marked *(unverified)*. The TLSNotary facts marked **[ran it]** were confirmed by building this prototype against `tlsn v0.1.0-alpha.15`.
+Facts below were gathered on 2026-10-04 from project docs, release pages and GitHub, and link to their source where one exists. Anything I could not confirm is marked *(unverified)*. The TLSNotary facts marked **[ran it]** were confirmed by building this prototype against `tlsn v0.1.0-alpha.15`.
+
+> **How to read this.** Only the **[ran it]** items were reproduced. Every other claim (versions, release dates, performance figures, licences, product status) is as reported by the linked page on 2026-10-04 and was not re-checked when the repo was prepared for release. Claims with no link are marked *(unverified)*. Vendor products change quickly; check the source before relying on any of it.
 
 ## The three trust models
 
@@ -20,7 +22,7 @@ Facts below were gathered on 2026-10-04 from project docs, release pages and Git
 | **Proxy / witness** | An attestor relays the ciphertext between prover and server. The prover then proves in ZK that the redacted plaintext matches it. | That the attestor doesn't collude with the prover, **and** that the network path between the attestor and the server is honest. An attacker who controls both the prover and that path (DNS or BGP) can forge. | Reclaim, TLSNotary Proxy mode (new in alpha.15), Primus (proxy mode) |
 | **TEE** | A notary or attestor runs inside SGX or TDX and re-signs results. | The hardware vendor, the enclave code, and attestation freshness. Side channels are a known risk. | Opacity (SGX notaries on EigenLayer), vlayer "vouch" (TDX), Pluto (TDX mode), zkp2p v3's attestation service |
 
-On-chain, **almost every stack ends in an ECDSA signature check** (a notary, attestor or TEE key, recovered with `ecrecover`). No vendor publishes a routinely used on-chain verifier that checks the TLS session itself. vlayer's RISC Zero path was the exception, and it is currently turned off. That is why this prototype puts a ZK proof on-chain only for the *predicate* (amount ≥ X), and trusts a notary signature for the *TLS session*.
+On-chain, **almost every stack I looked at ends in an ECDSA signature check** (a notary, attestor or TEE key, recovered with `ecrecover`). I found no vendor with a routinely used on-chain verifier that checks the TLS session itself *(to the best of my search, unverified)*. vlayer's RISC Zero path was the exception, and it is currently turned off. That is why this prototype puts a ZK proof on-chain only for the *predicate* (amount ≥ X), and trusts a notary signature for the *TLS session*.
 
 ## Stack by stack
 
@@ -29,7 +31,7 @@ On-chain, **almost every stack ends in an ECDSA signature check** (a notary, att
 - **Trust model.** MPC-TLS: the prover and the verifier/notary run 2PC over the TLS session keys, and the notary authenticates the transcript without seeing it. If you run the verifier yourself, you trust nobody. If someone else runs it, you trust them not to collude with the prover. alpha.15 adds a much faster **Proxy mode**, which carries the network-path assumption above. [FAQ](https://tlsnotary.org/docs/faq/), [Proxy mode post](https://tlsnotary.org/blog/2026/04/22/proxy-mode/)
 - **Maturity.** `v0.1.0-alpha.15` (May 2026), still labelled "not for production". It is very active, with a release about every 4 months. [releases](https://github.com/tlsnotary/tlsn/releases)
   - **[ran it]** The tag builds cleanly with Rust 1.96. Our two binaries took about 3 minutes for a cold release build.
-- **SDKs.** The Rust core, WASM for the browser (`tlsn-wasm`/`tlsn-sdk-core`; `tlsn-js` is deprecated), and a browser extension. Native mobile is future work.
+- **SDKs.** The Rust core, WASM for the browser (`tlsn-wasm`/`tlsn-sdk-core`; `tlsn-js` is deprecated), and a browser extension. Native mobile is future work *(from the docs, unverified)*.
 - **Local / keyless.** Yes, fully. **[ran it]** The prover and notary are two local processes, the "server" is any HTTPS endpoint, and you choose the root CA. There is no portal, no app ID and no hosted notary.
 - **Selective disclosure.** Byte-range reveal, plus **SHA-256 plaintext-hash commitments with blinders**, which can be opened inside a ZK circuit. The repo ships a Noir example that proves age ≥ 18 from a committed date of birth. **[ran it]** We use the same mechanism for amount ≥ threshold.
 - **On-chain.** No native verifier. The FAQ says to use an application-specific verifier, with on-chain verification "planned". Production users wrap it:
@@ -61,7 +63,7 @@ On-chain, **almost every stack ends in an ECDSA signature check** (a notary, att
   - Verification is two ECDSA signatures: one from the allocator and one from the validator. [docs](https://docs.zkpass.org/developer-guides/js-sdk/generate-proof-and-verify-the-result.md)
 - **Local / keyless.** **No.** It needs an `appid` and schemas from the Dev Center, plus the TransGate extension or mobile app. The network is hosted.
 - **On-chain.** ecrecover-style checks, documented for EVM, Solana and TON. You write the verifier contract yourself.
-- **Licence.** Examples are Apache-2.0. The JS SDK repo has no licence file.
+- **Licence.** Examples are Apache-2.0. The JS SDK repo had no licence file when checked *(unverified)*.
 - **Why not chosen.** It is not runnable without an account, and the core is not self-hostable.
 
 ### Opacity Network
@@ -79,7 +81,7 @@ On-chain, **almost every stack ends in an ECDSA signature check** (a notary, att
 ### Also checked briefly
 
 - **Pluto** (MPC, Origo proxy and TDX modes): `web-prover` (Apache-2.0) has had no pushes since March 2025. Treat it as dormant *(inferred)*.
-- **Primus (ex-PADO)**: proxy and MPC modes, with attestor signatures checked on-chain by `PrimusZKTLS.verifyAttestation`. It needs an appID/secret from its Developer Hub.
+- **Primus (ex-PADO)**: proxy and MPC modes, with attestor signatures checked on-chain by `PrimusZKTLS.verifyAttestation`. It needs an appID/secret from its Developer Hub *(from its docs, no link kept; unverified)*.
 - **zkp2p / Peer v3**: the production reference pattern.
   - It accepts TLSNotary, Primus or Reclaim proofs.
   - A TEE service validates them and emits an EIP-712 payment attestation.
@@ -104,7 +106,7 @@ On-chain, **almost every stack ends in an ECDSA signature check** (a notary, att
 
 - It is the only option that satisfies criterion 1 without caveats. The whole round trip ran on one laptop, against a mock bank I control, with no account anywhere.
 - Hash commitments with blinders are the right primitive for *"prove amount ≥ X without revealing the amount"*. Plain redaction either reveals the number or hides it, and it can't compare. I did not find numeric-predicate support in Reclaim's public docs *(unverified)*. TLSNotary commits to the exact bytes, and a ~36k-gate Noir circuit opens the commitment and checks the comparison.
-- The licence is permissive, so it can go into Capline (MIT) without friction.
+- The licence is permissive, so it can go into an MIT project without friction.
 - **Cost of the choice:**
   - TLS 1.2 only.
   - No canonical on-chain verifier, so we bridge with a notary signature, exactly as zkp2p does.
@@ -114,7 +116,7 @@ On-chain, **almost every stack ends in an ECDSA signature check** (a notary, att
 
 - **TLS-session facts** (server name, endpoint, currency, narration, the two commitments) are signed by the notary key (secp256k1, EIP-191). The contract checks them with `ecrecover`: about 3k gas plus string hashing.
 - **The predicate** over the hidden values (amount ≥ threshold, timestamp ≥ escrow creation) is an **UltraHonk proof verified on-chain** by a Solidity verifier that `bb` generated. It costs **about 2.73M gas** and takes a 9,024-byte proof.
-- Because of this split, the notary is trusted **only for "these bytes came from the bank's TLS session"**. It never learns the amount, and the contract doesn't trust it for the comparison at all.
+- Because of this split, the notary is trusted for **"these bytes came from the bank's TLS session"** and for **"these hidden bytes are the amount and timestamp of the credit with this narration"** (the template check, see SECURITY.md). It never learns the amount, and the contract doesn't trust it for the comparison at all.
 
 ### What would change the decision
 

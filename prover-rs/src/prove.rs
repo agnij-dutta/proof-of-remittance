@@ -73,7 +73,7 @@ const FLAGS: &[Flag] = &[
     Flag {
         name: "narration",
         default: None,
-        help: "narration of the credit to prove, e.g. POR-ESCROW-1",
+        help: "narration of the credit to prove, e.g. POR-D030ED06A56D6726B772",
     },
     Flag {
         name: "out",

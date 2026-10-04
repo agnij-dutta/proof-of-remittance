@@ -149,14 +149,14 @@ contract RemittanceEscrowTest is Test {
         escrow.release(1, att, sig, "");
     }
 
-    function test_higher_threshold_rejects_same_proof() public {
+    function test_higher_threshold_rejects_same_proof() public view {
         // Same proof, but public input threshold raised to Rs 1,00,000.
         bytes32[] memory p = escrow.publicInputs(1, att);
         p[0] = bytes32(uint256(10_000_000));
         assertFalse(_verifies(p));
     }
 
-    function test_later_min_ts_rejects_same_proof() public {
+    function test_later_min_ts_rejects_same_proof() public view {
         bytes32[] memory p = escrow.publicInputs(1, att);
         p[1] = bytes32(uint256(p[1]) + 1 days);
         assertFalse(_verifies(p));

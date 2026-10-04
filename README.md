@@ -259,7 +259,7 @@ What this repo adds: a hidden **numeric predicate** (amount ≥ threshold, times
 - Browser-extension prover flow for a real net-banking session, and a Stripe test-mode provider as the first real endpoint.
 - Gas: try `bb write_solidity_verifier --optimized`, or wrap in Groth16 (~250k to 300k gas).
 - Solana: UltraHonk verification there would need a Groth16 wrapper or another verifier.
-- Plug into an on-chain agent spend mandate: "₹X landed, so the agent's USDC ceiling rises by the equivalent", with an FX rate oracle.
+- Plug into an on-chain agent spend mandate such as [Capline](https://github.com/agnij-dutta/capline): "₹X landed, so the agent's USDC ceiling rises by the equivalent", with an FX rate oracle.
 
 ## Contributing, license, author
 

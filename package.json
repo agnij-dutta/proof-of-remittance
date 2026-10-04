@@ -45,7 +45,7 @@
     "verifier": "node verifier/server.mjs",
     "demo": "node scripts/demo.mjs",
     "fixture": "cp .run/fixture.json contracts/test/fixtures/bundle.json",
-    "check:verifier": "bb write_solidity_verifier -k circuit/target/vk -o .run/HonkVerifier.check.sol -t evm && cmp .run/HonkVerifier.check.sol contracts/src/HonkVerifier.sol"
+    "check:verifier": "mkdir -p .run && bb write_solidity_verifier -k circuit/target/vk -o .run/HonkVerifier.check.sol -t evm && cmp .run/HonkVerifier.check.sol contracts/src/HonkVerifier.sol"
   },
   "dependencies": {
     "viem": "^2.21.0"

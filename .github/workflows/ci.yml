@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  NARGO_VERSION: 1.0.0-beta.19
+  BB_VERSION: 4.0.0-nightly.20260120
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Lint, build, test, demo
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: prover-rs
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Install nargo and bb
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash
+          echo "$HOME/.nargo/bin" >> "$GITHUB_PATH"
+          "$HOME/.nargo/bin/noirup" -v "$NARGO_VERSION"
+          curl -fsSL https://raw.githubusercontent.com/AztecProtocol/aztec-packages/master/barretenberg/bbup/install | bash
+          echo "$HOME/.bb" >> "$GITHUB_PATH"
+          "$HOME/.bb/bbup" -v "$BB_VERSION"
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Lint and typecheck
+        run: npm run lint
+
+      - name: Build (certs, Rust, circuit, contracts)
+        run: npm run build
+
+      - name: Solidity verifier matches the circuit
+        run: npm run check:verifier
+
+      - name: Test (JS, Rust, Noir, Foundry)
+        run: npm test
+
+      - name: End-to-end demo with attacks
+        run: npm run demo
+        env:
+          NO_COLOR: "1"
+
+      - name: Upload demo logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-logs
+          path: .run/*.log
